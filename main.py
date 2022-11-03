@@ -2,11 +2,16 @@ from Encoder import Encoder
 
 
 def main():
+    e = Encoder(0)
+
     data_path = 'resources/dummy.txt'
     image_path = 'resources/small_original.png'
+    save_path = 'resources/small_edited.png'
+    e.encode(data_path, image_path, save_path)
 
-    e = Encoder(0)
-    e.encode(data_path, image_path)
+    image_path = 'resources/small_edited.png'
+    save_path = 'resources/dummy_edited.txt'
+    e.decode(image_path, save_path)
 
 
 if __name__ == '__main__':

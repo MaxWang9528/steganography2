@@ -39,41 +39,60 @@ class Encoder:
                 continue
             locs.append(randint)
             used[randint] = True
-        locs = np.arange(0, 88)
+        locs = np.arange(0, 99)
         return locs
 
     @staticmethod
-    def write_data(img_arr, bits_arr):
+    def write_data(img_arr, bits_arr, save_path):
         width = len(img_arr[0])
         height = len(img_arr)
+        # flat img array and bit str
         flat = img_arr.flatten()
         bit_str = ''
         for bits in bits_arr:
             bit_str += bits
         print(flat)
         print(bit_str)
-        locs = Encoder.gen_bit_loc(len(bit_str), len(flat))
-        print(locs)
 
-        for bit, i in enumerate(bit_str):
+        # iterate through bits and decide how to change img array sub-pixels
+        locs = Encoder.gen_bit_loc(len(bit_str), len(flat))
+        for i, bit in enumerate(bit_str):
             subpixel = flat[locs[i]]
             if subpixel == 255 and bit == '0':
                 subpixel = 254
-
             if subpixel // 2 * 2 == subpixel and bit == '1':            # if even and 1, change to odd
                 subpixel += 1                                           # if even and 0, do nothing
-            if subpixel // 2 * 2 != subpixel and bit == 0:              # if odd and 1, do nothing
+            if subpixel // 2 * 2 != subpixel and bit == '0':              # if odd and 1, do nothing
                 subpixel += 1                                           # if odd and 0, change to even
+            flat[locs[i]] = subpixel
+
+        # flat arr back to img
+        img = Image.fromarray(np.reshape(flat, (height, width, 3)), 'RGB')
+        img.save(save_path)
+
 
     @staticmethod
-    def encode(data_path, image_path):
+    def encode(data_path, image_path, save_path):
         img = Image.open(image_path)
         img_arr = np.asarray(img)
         bits_arr = Encoder.get_bits_arr(data_path)
-        print(bits_arr)
+        Encoder.write_data(img_arr, bits_arr, save_path)
 
-        Encoder.write_data(img_arr, bits_arr)
+    @staticmethod
+    def decode(image_path, save_path):
+        img = Image.open(image_path)
+        img_arr = np.asarray(img)
+        locs = Encoder.gen_bit_loc()
+        flat = img_arr.flatten()
+        bit_str = ''
+        print(flat)
+        for subpixel in flat:
+            if subpixel // 2 * 2 == subpixel:
+                bit_str += '0'
+            if subpixel // 2 * 2 != subpixel:
+                bit_str += '1'
 
+        print(bit_str)
 
 
 
