@@ -2,6 +2,7 @@ import numpy as np
 from PIL import Image
 import random
 import os
+import time
 
 
 class Encoder:
@@ -49,7 +50,7 @@ class Encoder:
                 subpixel = 254
             if subpixel // 2 * 2 == subpixel and bit == '1':            # if even and 1, change to odd
                 subpixel += 1                                           # if even and 0, do nothing
-            if subpixel // 2 * 2 != subpixel and bit == '0':              # if odd and 1, do nothing
+            if subpixel // 2 * 2 != subpixel and bit == '0':            # if odd and 1, do nothing
                 subpixel += 1                                           # if odd and 0, change to even
             flat[locs[i]] = subpixel
 
