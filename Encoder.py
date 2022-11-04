@@ -19,16 +19,6 @@ class Encoder:
             bits_arr.append(bits)
         return bits_arr
 
-    # @staticmethod
-    # def write_image(bits_arr):
-    #     byte_arr = []
-    #     for bits in bits_arr:
-    #         byte = int(bits, 2)
-    #         byte_arr.append(byte)
-    #     immutable_byte_arr = bytes(bytearray(byte_arr))
-    #     with open('resources/test.bin', 'wb') as f:
-    #         f.write(immutable_byte_arr)
-
     @staticmethod
     def gen_bit_loc(n, b):
         used = {}
@@ -39,7 +29,6 @@ class Encoder:
                 continue
             locs.append(randint)
             used[randint] = True
-        locs = np.arange(0, 99)
         return locs
 
     @staticmethod
@@ -51,8 +40,6 @@ class Encoder:
         bit_str = ''
         for bits in bits_arr:
             bit_str += bits
-        print(flat)
-        print(bit_str)
 
         # iterate through bits and decide how to change img array sub-pixels
         locs = Encoder.gen_bit_loc(len(bit_str), len(flat))
@@ -69,7 +56,7 @@ class Encoder:
         # flat arr back to img
         img = Image.fromarray(np.reshape(flat, (height, width, 3)), 'RGB')
         img.save(save_path)
-
+        print(f'length of bit str: {len(bit_str)}')
 
     @staticmethod
     def encode(data_path, image_path, save_path):
@@ -79,20 +66,27 @@ class Encoder:
         Encoder.write_data(img_arr, bits_arr, save_path)
 
     @staticmethod
-    def decode(image_path, save_path):
+    def decode(image_path, save_path, bit_str_len):
         img = Image.open(image_path)
         img_arr = np.asarray(img)
-        locs = Encoder.gen_bit_loc()
         flat = img_arr.flatten()
+        locs = Encoder.gen_bit_loc(bit_str_len, len(flat))
         bit_str = ''
-        print(flat)
-        for subpixel in flat:
+        for loc in locs:
+            subpixel = flat[loc]
             if subpixel // 2 * 2 == subpixel:
                 bit_str += '0'
             if subpixel // 2 * 2 != subpixel:
                 bit_str += '1'
 
-        print(bit_str)
+        byte_arr = []
+        bits_arr = [bit_str[i:i + 9] for i in range(0, len(bit_str), 9)]
+        for bits in bits_arr:
+            byte = int(bits, 2)
+            byte_arr.append(byte)
+        immutable_byte_arr = bytes(bytearray(byte_arr))
+        with open(save_path, 'wb') as f:
+            f.write(immutable_byte_arr)
 
 
 
